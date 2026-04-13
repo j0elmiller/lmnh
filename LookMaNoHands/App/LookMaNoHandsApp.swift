@@ -9,6 +9,7 @@ extension KeyboardShortcuts.Name {
 @main
 struct LookMaNoHandsApp: App {
     @State private var appState = AppState()
+    @State private var showOnboarding = false
 
     var body: some Scene {
         MenuBarExtra {
@@ -23,6 +24,14 @@ struct LookMaNoHandsApp: App {
             SettingsView()
                 .environment(appState)
         }
+
+        Window("Welcome", id: "onboarding") {
+            OnboardingView()
+                .environment(appState)
+        }
+        .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 500, height: 400)
+        .windowResizability(.contentSize)
     }
 
     init() {

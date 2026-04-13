@@ -3,6 +3,7 @@ import KeyboardShortcuts
 
 struct MenuBarView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -35,6 +36,9 @@ struct MenuBarView: View {
         .frame(width: 300)
         .task {
             appState.checkPermissions()
+            if !appState.hasCompletedOnboarding {
+                openWindow(id: "onboarding")
+            }
             if !appState.sttModelLoaded || !appState.ttsModelLoaded {
                 await appState.loadModels()
             }

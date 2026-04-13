@@ -29,6 +29,12 @@ final class AppState {
     var sttModelName = "openai_whisper-base"
     var dictationMode: DictationMode = .toggle
 
+    // MARK: - First Launch
+    var hasCompletedOnboarding: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasCompletedOnboarding") }
+    }
+
     // MARK: - Services
     let audioRecorder = AudioRecorder()
     let transcriptionEngine = TranscriptionEngine()
@@ -36,6 +42,15 @@ final class AppState {
     let textInjector = TextInjector()
     let textSelector = TextSelector()
     let permissionManager = PermissionManager()
+
+    // MARK: - Overlay
+    private var _overlayController: RecordingOverlayController?
+    var overlayController: RecordingOverlayController {
+        if let existing = _overlayController { return existing }
+        let controller = RecordingOverlayController(appState: self)
+        _overlayController = controller
+        return controller
+    }
 
     // MARK: - Menu Bar Icon
     var menuBarIcon: String {
@@ -74,6 +89,7 @@ final class AppState {
 
         isRecording = true
         errorMessage = nil
+        overlayController.show()
         audioRecorder.startRecording()
     }
 
@@ -85,6 +101,7 @@ final class AppState {
             let audioSamples = audioRecorder.stopRecording()
             guard !audioSamples.isEmpty else {
                 isTranscribing = false
+                overlayController.dismiss()
                 return
             }
 
@@ -99,6 +116,7 @@ final class AppState {
         }
 
         isTranscribing = false
+        overlayController.dismiss()
     }
 
     // MARK: - TTS Flow

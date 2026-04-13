@@ -43,7 +43,10 @@ struct OnboardingView: View {
                     Button("Next") { currentStep += 1 }
                         .buttonStyle(.borderedProminent)
                 } else {
-                    Button("Get Started") { dismiss() }
+                    Button("Get Started") {
+                        appState.hasCompletedOnboarding = true
+                        dismiss()
+                    }
                         .buttonStyle(.borderedProminent)
                 }
             }
