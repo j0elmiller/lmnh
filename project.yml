@@ -1,0 +1,42 @@
+name: LookMaNoHands
+options:
+  bundleIdPrefix: dev.lookmanohands
+  deploymentTarget:
+    macOS: "15.0"
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+
+packages:
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit.git
+    branch: main
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts.git
+    from: "2.0.0"
+
+targets:
+  LookMaNoHands:
+    type: application
+    platform: macOS
+    sources:
+      - path: LookMaNoHands
+        excludes:
+          - "**/*.plist"
+          - "**/*.entitlements"
+    settings:
+      base:
+        INFOPLIST_FILE: LookMaNoHands/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: LookMaNoHands/Resources/LookMaNoHands.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: dev.lookmanohands.app
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_IDENTITY: "-"
+    dependencies:
+      - package: WhisperKit
+        product: WhisperKit
+      - package: WhisperKit
+        product: TTSKit
+      - package: KeyboardShortcuts
