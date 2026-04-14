@@ -12,6 +12,7 @@
   <img src="https://img.shields.io/badge/platform-macOS%2015%2B-blue" alt="macOS 15+">
   <img src="https://img.shields.io/badge/swift-6.0-orange" alt="Swift 6">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
+  <a href="https://www.buymeacoffee.com/lmnh"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="20" alt="Buy Me a Coffee"></a>
 </p>
 
 ---
@@ -79,6 +80,14 @@ LookMaNoHands/
     RecordingOverlay.swift     # Floating pill during dictation
     SettingsView.swift         # Preferences window
 ```
+
+## Support
+
+If this app saves you the cost of a Wispr/Speechify subscription and you'd like to toss a few bucks my way, I'd appreciate it — but it's entirely optional. The app is and will stay free and open-source.
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/lmnh"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" alt="Buy Me a Coffee"></a>
+</p>
 
 ## License
 
