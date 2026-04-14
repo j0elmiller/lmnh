@@ -17,3 +17,10 @@ Packages/
 # IDE
 .vscode/
 .idea/
+
+# Bundled ML models (populated by scripts/release.sh, too large for git)
+LookMaNoHands/Resources/Models/
+
+# Release artifacts
+/dist/
+*.dmg

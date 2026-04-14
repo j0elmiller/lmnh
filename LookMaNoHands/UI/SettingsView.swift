@@ -1,6 +1,37 @@
 import SwiftUI
 import KeyboardShortcuts
 
+private struct VoiceOption: Hashable {
+    let id: String
+    let label: String
+}
+
+private let americanFemaleVoices: [VoiceOption] = [
+    .init(id: "af_alloy", label: "Alloy"),
+    .init(id: "af_aoede", label: "Aoede"),
+    .init(id: "af_bella", label: "Bella"),
+    .init(id: "af_heart", label: "Heart"),
+    .init(id: "af_jessica", label: "Jessica"),
+    .init(id: "af_kore", label: "Kore"),
+    .init(id: "af_nicole", label: "Nicole"),
+    .init(id: "af_nova", label: "Nova"),
+    .init(id: "af_river", label: "River"),
+    .init(id: "af_sarah", label: "Sarah"),
+    .init(id: "af_sky", label: "Sky"),
+]
+
+private let americanMaleVoices: [VoiceOption] = [
+    .init(id: "am_adam", label: "Adam"),
+    .init(id: "am_echo", label: "Echo"),
+    .init(id: "am_eric", label: "Eric"),
+    .init(id: "am_fenrir", label: "Fenrir"),
+    .init(id: "am_liam", label: "Liam"),
+    .init(id: "am_michael", label: "Michael"),
+    .init(id: "am_onyx", label: "Onyx"),
+    .init(id: "am_puck", label: "Puck"),
+    .init(id: "am_santa", label: "Santa"),
+]
+
 struct SettingsView: View {
     @Environment(AppState.self) private var appState
 
@@ -18,7 +49,7 @@ struct SettingsView: View {
                 modelSettings
             }
         }
-        .frame(width: 450, height: 300)
+        .frame(width: 480, height: 480)
     }
 
     // MARK: - General
@@ -38,6 +69,20 @@ struct SettingsView: View {
                     Spacer()
                     Image(systemName: appState.micPermissionGranted ? "checkmark.circle.fill" : "xmark.circle.fill")
                         .foregroundStyle(appState.micPermissionGranted ? .green : .red)
+                    if !appState.micPermissionGranted {
+                        if appState.permissionManager.canPromptForMicrophone {
+                            Button("Request Access") {
+                                Task {
+                                    let granted = await appState.permissionManager.requestMicrophonePermission()
+                                    appState.micPermissionGranted = granted
+                                }
+                            }
+                        } else {
+                            Button("Open Settings") {
+                                appState.permissionManager.openMicrophoneSettings()
+                            }
+                        }
+                    }
                 }
 
                 HStack {
@@ -53,8 +98,16 @@ struct SettingsView: View {
                 }
             }
         }
-        .padding()
+        .formStyle(.grouped)
         .onAppear { appState.checkPermissions() }
+        .task {
+            // Keep permission status live while Settings is open so grants
+            // made in System Settings are reflected without reopening.
+            while !Task.isCancelled {
+                appState.checkPermissions()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
     }
 
     // MARK: - Shortcuts
@@ -73,7 +126,7 @@ struct SettingsView: View {
                 KeyboardShortcuts.Recorder(for: .readSelection)
             }
         }
-        .padding()
+        .formStyle(.grouped)
     }
 
     // MARK: - Models
@@ -88,6 +141,9 @@ struct SettingsView: View {
                     Text("Small (~500 MB)").tag("openai_whisper-small")
                     Text("Medium (~1.5 GB)").tag("openai_whisper-medium")
                     Text("Large V3 (~3 GB)").tag("openai_whisper-large-v3")
+                }
+                .onChange(of: state.sttModelName) { _, _ in
+                    Task { await appState.reloadSTT() }
                 }
 
                 HStack {
@@ -105,6 +161,40 @@ struct SettingsView: View {
 
             Section("Text-to-Speech") {
                 HStack {
+                    Picker("Voice", selection: $state.ttsVoice) {
+                        ForEach(americanFemaleVoices, id: \.id) { v in
+                            Text("\(v.label) (F)").tag(v.id)
+                        }
+                        ForEach(americanMaleVoices, id: \.id) { v in
+                            Text("\(v.label) (M)").tag(v.id)
+                        }
+                    }
+                    .onChange(of: state.ttsVoice) { _, _ in
+                        Task { await appState.previewVoice() }
+                    }
+
+                    Button {
+                        Task { await appState.previewVoice() }
+                    } label: {
+                        Image(systemName: appState.isSpeaking ? "stop.fill" : "play.fill")
+                    }
+                    .buttonStyle(.borderless)
+                    .disabled(!appState.ttsModelLoaded)
+                    .help("Preview voice")
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Speed")
+                        Spacer()
+                        Text(String(format: "%.2fx", state.ttsSpeed))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    Slider(value: $state.ttsSpeed, in: 0.5...2.0, step: 0.1)
+                }
+
+                HStack {
                     Text("Status")
                     Spacer()
                     if appState.ttsModelLoaded {
@@ -121,6 +211,6 @@ struct SettingsView: View {
                 Task { await appState.loadModels() }
             }
         }
-        .padding()
+        .formStyle(.grouped)
     }
 }

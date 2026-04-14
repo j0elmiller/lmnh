@@ -144,15 +144,19 @@ struct OnboardingView: View {
     }
 
     private var modelStep: some View {
-        VStack(spacing: 16) {
+        let copy: ModelStepCopy = BundledModels.whisperFolder(named: appState.sttModelName) != nil
+            ? .bundled
+            : .download
+
+        return VStack(spacing: 16) {
             Image(systemName: "cpu.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(.purple)
 
-            Text("Download Models")
+            Text(copy.title)
                 .font(.headline)
 
-            Text("Models run locally on your Mac.\nThe base model (~150 MB) is recommended.")
+            Text(copy.subtitle)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -163,7 +167,7 @@ struct OnboardingView: View {
             } else if appState.isLoadingModels {
                 VStack(spacing: 8) {
                     ProgressView()
-                    Text("Downloading models...")
+                    Text(copy.progress)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -176,11 +180,20 @@ struct OnboardingView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Button("Download Now") {
+                Button(copy.cta) {
                     appState.errorMessage = nil
                     Task { await appState.loadModels() }
                 }
                 .buttonStyle(.bordered)
+            }
+        }
+        .task {
+            // Auto-kick loading when models are bundled — there's no 1GB
+            // download to wait on, so the user shouldn't have to click.
+            if copy == .bundled
+                && !appState.isLoadingModels
+                && !(appState.sttModelLoaded && appState.ttsModelLoaded) {
+                await appState.loadModels()
             }
         }
     }
@@ -199,6 +212,39 @@ struct OnboardingView: View {
                 Label("Option + S to read selected text", systemImage: "speaker.wave.2.fill")
             }
             .font(.body)
+        }
+    }
+}
+
+private enum ModelStepCopy {
+    case bundled
+    case download
+
+    var title: String {
+        switch self {
+        case .bundled: "Prepare Models"
+        case .download: "Download Models"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .bundled: "Models are bundled with the app — this\nwill only take a moment."
+        case .download: "Models run locally on your Mac.\nThe base model (~150 MB) is recommended."
+        }
+    }
+
+    var progress: String {
+        switch self {
+        case .bundled: "Preparing models..."
+        case .download: "Downloading models..."
+        }
+    }
+
+    var cta: String {
+        switch self {
+        case .bundled: "Continue"
+        case .download: "Download Now"
         }
     }
 }

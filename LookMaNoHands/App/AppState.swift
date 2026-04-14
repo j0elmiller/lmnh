@@ -13,13 +13,34 @@ private let hotkeyLogger = Logger(subsystem: "dev.lookmanohands.app", category: 
 private nonisolated(unsafe) var _hotkeyAppState: AppState?
 
 private func registerHotkeys() {
+    KeyboardShortcuts.onKeyDown(for: .toggleDictation) {
+        Task { @MainActor in
+            guard let state = _hotkeyAppState else { return }
+            // Push-to-Talk: press starts recording immediately.
+            // Toggle mode ignores key-down and acts on key-up.
+            if state.dictationMode == .pushToTalk
+                && !state.isRecording
+                && !state.isTranscribing {
+                await state.startDictation()
+            }
+        }
+    }
     KeyboardShortcuts.onKeyUp(for: .toggleDictation) {
         hotkeyLogger.debug("toggleDictation fired")
         Task { @MainActor in
-            await _hotkeyAppState?.toggleDictation()
+            guard let state = _hotkeyAppState else { return }
+            switch state.dictationMode {
+            case .toggle:
+                await state.toggleDictation()
+            case .pushToTalk:
+                if state.isRecording {
+                    await state.stopDictation()
+                }
+            }
         }
     }
     KeyboardShortcuts.onKeyUp(for: .readSelection) {
+        hotkeyLogger.debug("readSelection fired")
         Task { @MainActor in
             await _hotkeyAppState?.toggleReading()
         }
@@ -49,8 +70,21 @@ final class AppState: @unchecked Sendable {
     var errorMessage: String?
 
     // MARK: - Settings
-    var sttModelName = "openai_whisper-base"
+    var sttModelName: String = (UserDefaults.standard.string(forKey: "sttModelName") ?? "openai_whisper-base") {
+        didSet { UserDefaults.standard.set(sttModelName, forKey: "sttModelName") }
+    }
     var dictationMode: DictationMode = .toggle
+
+    var ttsVoice: String = (UserDefaults.standard.string(forKey: "ttsVoice") ?? "af_heart") {
+        didSet { UserDefaults.standard.set(ttsVoice, forKey: "ttsVoice") }
+    }
+
+    var ttsSpeed: Double = {
+        let v = UserDefaults.standard.double(forKey: "ttsSpeed")
+        return v == 0 ? 1.0 : v
+    }() {
+        didSet { UserDefaults.standard.set(ttsSpeed, forKey: "ttsSpeed") }
+    }
 
     // MARK: - First Launch
     var hasCompletedOnboarding: Bool {
@@ -65,6 +99,9 @@ final class AppState: @unchecked Sendable {
     let textInjector: TextInjector
     let textSelector: TextSelector
     let permissionManager: PermissionManager
+
+    // MARK: - Previous App (for restoring focus when TTS triggered from menu bar)
+    @ObservationIgnored private var previousApp: NSRunningApplication?
 
     // MARK: - Overlay
     @ObservationIgnored private var _overlayController: RecordingOverlayController?
@@ -96,6 +133,20 @@ final class AppState: @unchecked Sendable {
         hasStarted = true
         logger.info("startupIfNeeded called")
         checkPermissions()
+
+        // Track the last non-LMNH app that lost focus so we can restore it
+        // before reading selected text (the menu bar panel steals focus).
+        let bundleID = Bundle.main.bundleIdentifier
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didDeactivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            if let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+               app.bundleIdentifier != bundleID {
+                self?.previousApp = app
+            }
+        }
 
         // Register hotkeys via file-scope nonisolated function so closures
         // don't inherit @MainActor isolation (avoids Carbon thread crash).
@@ -236,7 +287,30 @@ final class AppState: @unchecked Sendable {
             return
         }
 
-        guard let selectedText = textSelector.getSelectedText(), !selectedText.isEmpty else {
+        guard ttsModelLoaded else {
+            errorMessage = "TTS model not loaded yet"
+            return
+        }
+
+        if !accessibilityPermissionGranted {
+            checkPermissions()
+            guard accessibilityPermissionGranted else {
+                permissionManager.requestAccessibilityPermission()
+                errorMessage = "Accessibility permission required to read selected text"
+                return
+            }
+        }
+
+        // If triggered from the menu bar panel, focus is on LMNH — restore
+        // the previous app so the AX API reads from the correct window.
+        if NSApp.isActive, let app = previousApp {
+            app.activate()
+            try? await Task.sleep(for: .milliseconds(200))
+        }
+
+        let selectedText = await textSelector.getSelectedText()
+
+        guard let selectedText, !selectedText.isEmpty else {
             errorMessage = "No text selected"
             return
         }
@@ -245,9 +319,32 @@ final class AppState: @unchecked Sendable {
         errorMessage = nil
 
         do {
-            try await speechEngine.speak(text: selectedText)
+            try await speechEngine.speak(text: selectedText, voice: ttsVoice, speed: Float(ttsSpeed))
         } catch {
+            logger.error("TTS speak failed: \(error.localizedDescription)")
             errorMessage = "TTS failed: \(error.localizedDescription)"
+        }
+
+        isSpeaking = false
+    }
+
+    @MainActor func previewVoice() async {
+        guard ttsModelLoaded else {
+            errorMessage = "TTS model not loaded yet"
+            return
+        }
+
+        // Stop whatever is currently playing (previous preview or a selection read).
+        speechEngine.stop()
+
+        isSpeaking = true
+        errorMessage = nil
+
+        let sample = "The quick brown fox jumps over the lazy dog."
+        do {
+            try await speechEngine.speak(text: sample, voice: ttsVoice, speed: Float(ttsSpeed))
+        } catch {
+            errorMessage = "TTS preview failed: \(error.localizedDescription)"
         }
 
         isSpeaking = false
@@ -279,6 +376,22 @@ final class AppState: @unchecked Sendable {
 
         isLoadingModels = false
         logger.info("Models loaded. STT=\(self.sttModelLoaded), TTS=\(self.ttsModelLoaded)")
+    }
+
+    @MainActor func reloadSTT() async {
+        guard !isLoadingModels else { return }
+        isLoadingModels = true
+        sttModelLoaded = false
+        defer { isLoadingModels = false }
+
+        do {
+            try await transcriptionEngine.loadModel(named: sttModelName)
+            sttModelLoaded = true
+            logger.info("STT reloaded: \(self.sttModelName)")
+        } catch {
+            logger.error("STT reload failed: \(error.localizedDescription)")
+            errorMessage = "Failed to load STT model: \(error.localizedDescription)"
+        }
     }
 }
 

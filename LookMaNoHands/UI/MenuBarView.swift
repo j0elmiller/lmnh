@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -132,7 +133,25 @@ struct MenuBarView: View {
     private var footerSection: some View {
         HStack {
             Spacer()
-            SettingsLink { Text("Settings") }.font(.caption)
+            Button("Settings") {
+                NSApp.activate(ignoringOtherApps: true)
+                openSettings()
+                // In LSUIElement + MenuBarExtra apps, the popover dismissing
+                // hands focus back to whatever app was previously frontmost,
+                // so the Settings window ends up buried. Defer to the next
+                // runloop tick (after the popover has dismissed) and force
+                // the window above everything else.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    NSApp.activate(ignoringOtherApps: true)
+                    if let settings = NSApp.windows.first(where: {
+                        $0.identifier?.rawValue == "com_apple_SwiftUI_Settings_window"
+                    }) {
+                        settings.makeKeyAndOrderFront(nil)
+                        settings.orderFrontRegardless()
+                    }
+                }
+            }
+            .font(.caption)
             Button("Quit") { NSApplication.shared.terminate(nil) }.font(.caption)
         }
     }

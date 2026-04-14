@@ -1,31 +1,97 @@
 import Foundation
-import TTSKit
+import AVFoundation
+import FluidAudio
+import os
 
-final class SpeechEngine: @unchecked Sendable {
-    private var ttsKit: TTSKit?
+private let logger = Logger(subsystem: "dev.lookmanohands.app", category: "SpeechEngine")
 
-    var isLoaded: Bool { ttsKit != nil }
+final class SpeechEngine: NSObject, @unchecked Sendable {
+    private var ttsManager: KokoroTtsManager?
+    private var player: AVAudioPlayer?
+    private var cancelled = false
+    private var finishContinuation: CheckedContinuation<Void, Never>?
+
+    var isLoaded: Bool { ttsManager != nil }
 
     func loadModel() async throws {
-        ttsKit = try await TTSKit()
+        logger.info("Initializing Kokoro TTS...")
+        try seedKokoroCacheIfNeeded()
+        let manager = KokoroTtsManager()
+        try await manager.initialize()
+        ttsManager = manager
+        logger.info("Kokoro TTS ready")
     }
 
-    func speak(text: String) async throws {
-        guard let ttsKit else {
+    /// Copies bundled Kokoro models into FluidAudio's hard-coded cache dir on
+    /// first launch. FluidAudio's internal call sites ignore any `directory:`
+    /// override, so seeding the cache is the simplest way to ship
+    /// fully-offline. No-op on subsequent launches, and no-op if the app was
+    /// built without bundled models (dev builds, etc.).
+    private func seedKokoroCacheIfNeeded() throws {
+        let dest = BundledModels.kokoroCacheDestination
+        if FileManager.default.fileExists(atPath: dest.path) { return }
+        guard let src = BundledModels.kokoroSource else {
+            logger.info("No bundled Kokoro payload found — will download on first init")
+            return
+        }
+
+        logger.info("Seeding Kokoro cache from bundle -> \(dest.path)")
+        try FileManager.default.createDirectory(
+            at: dest.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try FileManager.default.copyItem(at: src, to: dest)
+    }
+
+    func speak(text: String, voice: String, speed: Float) async throws {
+        guard let ttsManager else {
             throw SpeechError.modelNotLoaded
         }
 
-        _ = try await ttsKit.play(text: text)
+        cancelled = false
+
+        let audioData = try await ttsManager.synthesize(
+            text: text,
+            voice: voice,
+            voiceSpeed: speed
+        )
+
+        guard !cancelled else { return }
+
+        let newPlayer = try AVAudioPlayer(data: audioData)
+        newPlayer.delegate = self
+        player = newPlayer
+
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            finishContinuation = continuation
+            newPlayer.play()
+        }
+
+        player = nil
     }
 
     func stop() {
-        Task {
-            await ttsKit?.audioOutput.stopPlayback()
-        }
+        cancelled = true
+        player?.stop()
+        player = nil
+        resumeFinish()
     }
 
     func unloadModel() {
-        ttsKit = nil
+        ttsManager = nil
+    }
+
+    private func resumeFinish() {
+        if let continuation = finishContinuation {
+            finishContinuation = nil
+            continuation.resume()
+        }
+    }
+}
+
+extension SpeechEngine: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        resumeFinish()
     }
 }
 

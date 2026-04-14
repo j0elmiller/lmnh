@@ -7,7 +7,10 @@ final class TranscriptionEngine: @unchecked Sendable {
     var isLoaded: Bool { whisperKit != nil }
 
     func loadModel(named modelName: String) async throws {
-        let config = WhisperKitConfig(model: modelName)
+        // If the model is bundled, load from disk and skip the Hugging Face
+        // download. Otherwise fall back to WhisperKit's default hub behavior.
+        let bundledFolder = BundledModels.whisperFolder(named: modelName)?.path
+        let config = WhisperKitConfig(model: modelName, modelFolder: bundledFolder, load: true)
         whisperKit = try await WhisperKit(config)
     }
 
