@@ -12,6 +12,7 @@ Packages/
 # macOS
 .DS_Store
 *.dSYM
+*.app
 
 # IDE
 .vscode/

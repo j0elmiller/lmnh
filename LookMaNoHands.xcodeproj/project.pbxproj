@@ -14,7 +14,6 @@
 		5B8F4BF3DC99560415EE3813 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7475F4AC562A9E21F93742D /* OnboardingView.swift */; };
 		738644C3EEA842209B5393F0 /* LookMaNoHandsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C28D10F5385475553C205129 /* LookMaNoHandsApp.swift */; };
 		7CD25033A82FBC052586F1CB /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = ABB04A7DF5F77B9CC32FF5C4 /* KeyboardShortcuts */; };
-		867B65A6A7F5C96A59FE51C9 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E1657093A0CF038B4364F6 /* HotkeyManager.swift */; };
 		86CAE5E056A7D524784FFA11 /* TranscriptionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D829486273FDC69AB4AC7C0 /* TranscriptionEngine.swift */; };
 		899C3A7BADFBB5ED4E33B450 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F6F6A8C253688854D2C007 /* AppState.swift */; };
 		96357B210922841F9B3B9210 /* SpeechEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DAF06974C0B6894D8E9E0A /* SpeechEngine.swift */; };
@@ -34,7 +33,6 @@
 		2D36A4FE989B8E47DC1D4322 /* TextInjector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInjector.swift; sourceTree = "<group>"; };
 		316376999D2ABB4EBC0431B5 /* LookMaNoHands.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LookMaNoHands.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6DDA962D0AF33CCD936CDF96 /* TextSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSelector.swift; sourceTree = "<group>"; };
-		80E1657093A0CF038B4364F6 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		815A8CAE5D0291010855940E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9C14C07D1AE2CC6BBE75C6F1 /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
 		A117C6C29B3BDEBF08C83BC1 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
@@ -110,7 +108,6 @@
 		7C76B210CF65C35DFD009A0A /* System */ = {
 			isa = PBXGroup;
 			children = (
-				80E1657093A0CF038B4364F6 /* HotkeyManager.swift */,
 				B72122677543D3CBF1C53E3C /* PermissionManager.swift */,
 				2D36A4FE989B8E47DC1D4322 /* TextInjector.swift */,
 				6DDA962D0AF33CCD936CDF96 /* TextSelector.swift */,
@@ -236,7 +233,6 @@
 			files = (
 				899C3A7BADFBB5ED4E33B450 /* AppState.swift in Sources */,
 				C9372D6EA8BCD5D8050509F3 /* AudioRecorder.swift in Sources */,
-				867B65A6A7F5C96A59FE51C9 /* HotkeyManager.swift in Sources */,
 				738644C3EEA842209B5393F0 /* LookMaNoHandsApp.swift in Sources */,
 				ACB1069E86A4B622012673F8 /* MenuBarView.swift in Sources */,
 				5B8F4BF3DC99560415EE3813 /* OnboardingView.swift in Sources */,

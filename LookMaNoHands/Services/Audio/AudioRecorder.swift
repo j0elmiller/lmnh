@@ -1,35 +1,44 @@
 import AVFoundation
 
-@MainActor
-final class AudioRecorder {
+// Thread-safe buffer for audio tap callback (runs on audio thread)
+private final class SampleBuffer: @unchecked Sendable {
+    private let lock = NSLock()
+    private var samples: [Float] = []
+
+    func append(_ newSamples: [Float]) {
+        lock.lock()
+        samples.append(contentsOf: newSamples)
+        lock.unlock()
+    }
+
+    func drain() -> [Float] {
+        lock.lock()
+        let result = samples
+        samples.removeAll()
+        lock.unlock()
+        return result
+    }
+}
+
+final class AudioRecorder: @unchecked Sendable {
     private var audioEngine: AVAudioEngine?
-    private var audioSamples: [Float] = []
-    private let sampleRate: Double = 16000
+    private var sampleBuffer = SampleBuffer()
+    private let targetSampleRate: Double = 16000
+    private var nativeSampleRate: Double = 48000
 
     func startRecording() {
-        audioSamples.removeAll()
-
         let engine = AVAudioEngine()
         let inputNode = engine.inputNode
-        let recordingFormat = AVAudioFormat(
-            commonFormat: .pcmFormatFloat32,
-            sampleRate: sampleRate,
-            channels: 1,
-            interleaved: false
-        )!
+        let nativeFormat = inputNode.outputFormat(forBus: 0)
+        nativeSampleRate = nativeFormat.sampleRate
 
-        // Install a tap to capture audio buffers
-        let bufferSize: AVAudioFrameCount = 1024
-        inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: recordingFormat) { [weak self] buffer, _ in
-            guard let self else { return }
-            let channelData = buffer.floatChannelData?[0]
-            let frameLength = Int(buffer.frameLength)
-            if let channelData, frameLength > 0 {
-                let samples = Array(UnsafeBufferPointer(start: channelData, count: frameLength))
-                Task { @MainActor in
-                    self.audioSamples.append(contentsOf: samples)
-                }
-            }
+        // Capture only the Sendable buffer — no self reference in the tap
+        let buffer = sampleBuffer
+        inputNode.installTap(onBus: 0, bufferSize: 4096, format: nativeFormat) { pcmBuffer, _ in
+            guard let channelData = pcmBuffer.floatChannelData?[0] else { return }
+            let count = Int(pcmBuffer.frameLength)
+            guard count > 0 else { return }
+            buffer.append(Array(UnsafeBufferPointer(start: channelData, count: count)))
         }
 
         do {
@@ -37,7 +46,7 @@ final class AudioRecorder {
             try engine.start()
             self.audioEngine = engine
         } catch {
-            print("AudioRecorder: Failed to start engine: \(error)")
+            NSLog("LMNH: AudioRecorder failed to start: \(error)")
         }
     }
 
@@ -45,9 +54,18 @@ final class AudioRecorder {
         audioEngine?.inputNode.removeTap(onBus: 0)
         audioEngine?.stop()
         audioEngine = nil
-        let samples = audioSamples
-        audioSamples.removeAll()
-        return samples
+
+        let samples = sampleBuffer.drain()
+
+        // Downsample from native rate to 16kHz for WhisperKit
+        guard nativeSampleRate != targetSampleRate, !samples.isEmpty else {
+            return samples
+        }
+        let ratio = nativeSampleRate / targetSampleRate
+        let outputLength = Int(Double(samples.count) / ratio)
+        return (0..<outputLength).map { i in
+            samples[min(Int(Double(i) * ratio), samples.count - 1)]
+        }
     }
 
     var isRecording: Bool {

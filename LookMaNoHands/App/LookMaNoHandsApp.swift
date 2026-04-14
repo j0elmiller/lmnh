@@ -6,10 +6,18 @@ extension KeyboardShortcuts.Name {
     static let readSelection = Self("readSelection", default: .init(.s, modifiers: .option))
 }
 
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {}
+
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return false
+    }
+}
+
 @main
 struct LookMaNoHandsApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @State private var appState = AppState()
-    @State private var showOnboarding = false
 
     var body: some Scene {
         MenuBarExtra {
@@ -23,32 +31,6 @@ struct LookMaNoHandsApp: App {
         Settings {
             SettingsView()
                 .environment(appState)
-        }
-
-        Window("Welcome", id: "onboarding") {
-            OnboardingView()
-                .environment(appState)
-        }
-        .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 500, height: 400)
-        .windowResizability(.contentSize)
-    }
-
-    init() {
-        setupHotkeys()
-    }
-
-    private func setupHotkeys() {
-        KeyboardShortcuts.onKeyUp(for: .toggleDictation) { [appState] in
-            Task { @MainActor in
-                await appState.toggleDictation()
-            }
-        }
-
-        KeyboardShortcuts.onKeyUp(for: .readSelection) { [appState] in
-            Task { @MainActor in
-                await appState.toggleReading()
-            }
         }
     }
 }

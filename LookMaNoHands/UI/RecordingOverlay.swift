@@ -1,56 +1,23 @@
 import SwiftUI
 
 struct RecordingOverlay: View {
-    @Environment(AppState.self) private var appState
+    var isTranscribing: Bool
 
     var body: some View {
         HStack(spacing: 12) {
-            // Pulsing mic indicator
-            Image(systemName: appState.isTranscribing ? "ellipsis.circle.fill" : "mic.fill")
+            Image(systemName: isTranscribing ? "ellipsis.circle.fill" : "mic.fill")
                 .font(.title2)
-                .foregroundStyle(appState.isTranscribing ? .orange : .red)
-                .symbolEffect(.pulse, isActive: appState.isRecording)
+                .foregroundStyle(isTranscribing ? .orange : .red)
 
-            if appState.isTranscribing {
-                Text("Transcribing...")
-                    .font(.body)
-                    .foregroundStyle(.primary)
-            } else {
-                // Simple audio level bars
-                WaveformView()
-                    .frame(width: 60, height: 24)
-
-                Text("Listening...")
-                    .font(.body)
-                    .foregroundStyle(.primary)
-            }
+            Text(isTranscribing ? "Transcribing..." : "Listening...")
+                .font(.body)
+                .foregroundStyle(.primary)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .frame(width: 200, height: 44)
         .background(.ultraThinMaterial, in: Capsule())
         .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
-    }
-}
-
-struct WaveformView: View {
-    @State private var animating = false
-
-    var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<5, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(.red.opacity(0.8))
-                    .frame(width: 4)
-                    .frame(height: animating ? CGFloat.random(in: 8...24) : 8)
-                    .animation(
-                        .easeInOut(duration: 0.3)
-                        .repeatForever(autoreverses: true)
-                        .delay(Double(index) * 0.1),
-                        value: animating
-                    )
-            }
-        }
-        .onAppear { animating = true }
     }
 }
 
@@ -59,17 +26,13 @@ struct WaveformView: View {
 @MainActor
 final class RecordingOverlayController {
     private var window: NSPanel?
-    private var appState: AppState
-
-    init(appState: AppState) {
-        self.appState = appState
-    }
+    private var hostingView: NSHostingView<RecordingOverlay>?
 
     func show() {
         guard window == nil else { return }
 
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 250, height: 60),
+            contentRect: NSRect(x: 0, y: 0, width: 200, height: 44),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -81,16 +44,13 @@ final class RecordingOverlayController {
         panel.isMovableByWindowBackground = true
         panel.hasShadow = false
 
-        let hostingView = NSHostingView(
-            rootView: RecordingOverlay()
-                .environment(appState)
-        )
-        panel.contentView = hostingView
+        let hv = NSHostingView(rootView: RecordingOverlay(isTranscribing: false))
+        panel.contentView = hv
+        self.hostingView = hv
 
-        // Position near top center of screen
         if let screen = NSScreen.main {
             let screenFrame = screen.visibleFrame
-            let x = screenFrame.midX - 125
+            let x = screenFrame.midX - 100
             let y = screenFrame.maxY - 80
             panel.setFrameOrigin(NSPoint(x: x, y: y))
         }
@@ -99,8 +59,13 @@ final class RecordingOverlayController {
         self.window = panel
     }
 
+    func updateTranscribing(_ isTranscribing: Bool) {
+        hostingView?.rootView = RecordingOverlay(isTranscribing: isTranscribing)
+    }
+
     func dismiss() {
         window?.close()
         window = nil
+        hostingView = nil
     }
 }

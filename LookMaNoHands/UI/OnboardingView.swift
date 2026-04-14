@@ -3,7 +3,7 @@ import SwiftUI
 struct OnboardingView: View {
     @Environment(AppState.self) private var appState
     @State private var currentStep = 0
-    @Environment(\.dismiss) private var dismiss
+    @State private var accessibilityCheckFailed = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -12,10 +12,11 @@ struct OnboardingView: View {
                 .font(.title)
                 .fontWeight(.bold)
 
-            Text("System-wide dictation and text-to-speech, running entirely on your Mac.")
+            Text("System-wide dictation and text-to-speech,\nrunning entirely on your Mac.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
 
             Divider()
 
@@ -45,14 +46,28 @@ struct OnboardingView: View {
                 } else {
                     Button("Get Started") {
                         appState.hasCompletedOnboarding = true
-                        dismiss()
+                        appState.dismissOnboarding()
                     }
                         .buttonStyle(.borderedProminent)
                 }
             }
         }
-        .padding(32)
-        .frame(width: 500, height: 400)
+        .padding(40)
+        .frame(width: 560)
+        .frame(minHeight: 450)
+        .onAppear {
+            appState.checkPermissions()
+            // Auto-advance past already-granted steps
+            if appState.micPermissionGranted && currentStep == 0 {
+                currentStep = 1
+            }
+            if appState.accessibilityPermissionGranted && currentStep == 1 {
+                currentStep = 2
+            }
+            if appState.sttModelLoaded && appState.ttsModelLoaded && currentStep == 2 {
+                currentStep = 3
+            }
+        }
     }
 
     // MARK: - Steps
@@ -101,15 +116,29 @@ struct OnboardingView: View {
                 Label("Granted", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
             } else {
+                Text("Toggle on **LookMaNoHands** in System Settings.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
                 Button("Open System Settings") {
-                    appState.permissionManager.openAccessibilitySettings()
+                    // Trigger the system prompt so the app appears in the list
+                    appState.permissionManager.requestAccessibilityPermission()
                 }
                 .buttonStyle(.bordered)
 
-                Button("Check Again") {
+                Button("I've enabled it") {
                     appState.checkPermissions()
+                    accessibilityCheckFailed = !appState.accessibilityPermissionGranted
                 }
                 .font(.caption)
+
+                if accessibilityCheckFailed {
+                    Text("Not detected. If you already toggled it on, try removing LookMaNoHands from the list and re-adding it (use the + button), then click \"I've enabled it\" again.")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
     }
@@ -123,17 +152,32 @@ struct OnboardingView: View {
             Text("Download Models")
                 .font(.headline)
 
-            Text("Models run locally on your Mac. The base model (~150 MB) is recommended to start.")
+            Text("Models run locally on your Mac.\nThe base model (~150 MB) is recommended.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
 
             if appState.sttModelLoaded && appState.ttsModelLoaded {
                 Label("Models Ready", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
             } else if appState.isLoadingModels {
-                ProgressView("Downloading models...")
+                VStack(spacing: 8) {
+                    ProgressView()
+                    Text("Downloading models...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             } else {
+                if let error = appState.errorMessage {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 Button("Download Now") {
+                    appState.errorMessage = nil
                     Task { await appState.loadModels() }
                 }
                 .buttonStyle(.bordered)

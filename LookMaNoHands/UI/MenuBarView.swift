@@ -1,48 +1,20 @@
 import SwiftUI
-import KeyboardShortcuts
 
 struct MenuBarView: View {
     @Environment(AppState.self) private var appState
-    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Status
             statusSection
-
             Divider()
-
-            // Actions
             actionButtons
-
             Divider()
-
-            // Last transcription
-            if let text = appState.lastTranscription {
-                lastTranscriptionSection(text)
-                Divider()
-            }
-
-            // Errors
-            if let error = appState.errorMessage {
-                errorSection(error)
-                Divider()
-            }
-
-            // Footer
+            lastTranscriptionSection
+            errorSection
             footerSection
         }
         .padding(12)
-        .frame(width: 300)
-        .task {
-            appState.checkPermissions()
-            if !appState.hasCompletedOnboarding {
-                openWindow(id: "onboarding")
-            }
-            if !appState.sttModelLoaded || !appState.ttsModelLoaded {
-                await appState.loadModels()
-            }
-        }
+        .frame(width: 280)
     }
 
     // MARK: - Status
@@ -87,8 +59,9 @@ struct MenuBarView: View {
                     Image(systemName: appState.isRecording ? "stop.circle.fill" : "mic.fill")
                     Text(appState.isRecording ? "Stop Dictation" : "Start Dictation")
                     Spacer()
-                    KeyboardShortcuts.Recorder(for: .toggleDictation)
-                        .fixedSize()
+                    Text("Option+Space")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             .disabled(!appState.sttModelLoaded || appState.isTranscribing)
@@ -100,8 +73,9 @@ struct MenuBarView: View {
                     Image(systemName: appState.isSpeaking ? "stop.circle.fill" : "speaker.wave.2.fill")
                     Text(appState.isSpeaking ? "Stop Reading" : "Read Selection")
                     Spacer()
-                    KeyboardShortcuts.Recorder(for: .readSelection)
-                        .fixedSize()
+                    Text("Option+S")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             .disabled(!appState.ttsModelLoaded)
@@ -109,10 +83,13 @@ struct MenuBarView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Last Transcription
+    // MARK: - Last Transcription (stable tree – use opacity to hide)
 
-    private func lastTranscriptionSection(_ text: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    private var lastTranscriptionSection: some View {
+        let text = appState.lastTranscription ?? ""
+        let visible = !text.isEmpty
+        return VStack(alignment: .leading, spacing: 4) {
+            Divider()
             Text("Last transcription:")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -120,7 +97,6 @@ struct MenuBarView: View {
                 .font(.body)
                 .lineLimit(3)
                 .textSelection(.enabled)
-
             Button("Copy") {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(text, forType: .string)
@@ -129,48 +105,35 @@ struct MenuBarView: View {
             .buttonStyle(.plain)
             .foregroundStyle(.blue)
         }
+        .opacity(visible ? 1 : 0)
+        .frame(height: visible ? nil : 0)
+        .clipped()
     }
 
-    // MARK: - Error
+    // MARK: - Error (stable tree – use opacity to hide)
 
-    private func errorSection(_ error: String) -> some View {
-        HStack {
+    private var errorSection: some View {
+        let error = appState.errorMessage ?? ""
+        let visible = !error.isEmpty
+        return HStack {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.yellow)
             Text(error)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .opacity(visible ? 1 : 0)
+        .frame(height: visible ? nil : 0)
+        .clipped()
     }
 
     // MARK: - Footer
 
     private var footerSection: some View {
         HStack {
-            if !appState.micPermissionGranted || !appState.accessibilityPermissionGranted {
-                Button("Grant Permissions") {
-                    if !appState.micPermissionGranted {
-                        Task { _ = await appState.permissionManager.requestMicrophonePermission() }
-                    }
-                    if !appState.accessibilityPermissionGranted {
-                        appState.permissionManager.requestAccessibilityPermission()
-                    }
-                    appState.checkPermissions()
-                }
-                .font(.caption)
-            }
-
             Spacer()
-
-            SettingsLink {
-                Text("Settings")
-            }
-            .font(.caption)
-
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
-            }
-            .font(.caption)
+            SettingsLink { Text("Settings") }.font(.caption)
+            Button("Quit") { NSApplication.shared.terminate(nil) }.font(.caption)
         }
     }
 }
