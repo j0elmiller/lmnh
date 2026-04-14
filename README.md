@@ -21,10 +21,10 @@ A native macOS menu bar app that replaces cloud-based dictation and text-to-spee
 
 ## Features
 
-- **Speech-to-Text** -- Press `Option + Space` to dictate anywhere. Your speech is transcribed locally using [WhisperKit](https://github.com/argmaxinc/WhisperKit) and injected at the cursor.
-- **Text-to-Speech** -- Select text in any app and press `Option + S` to hear it read aloud using on-device TTS.
-- **Fully Local** -- All models run on Apple Silicon via CoreML. Nothing is sent to the cloud.
-- **System-Wide** -- Works in any app with global hotkeys and accessibility-based text injection.
+- **Speech-to-Text**: Press `Option + Space` to dictate anywhere. Your speech is transcribed locally using [WhisperKit](https://github.com/argmaxinc/WhisperKit) and injected at the cursor.
+- **Text-to-Speech**: Select text in any app and press `Option + S` to hear it read aloud using on-device TTS.
+- **Fully Local**: All models run on Apple Silicon via CoreML. Nothing is sent to the cloud.
+- **System-Wide**: Works in any app with global hotkeys and accessibility-based text injection.
 
 ## Requirements
 
@@ -83,7 +83,7 @@ LookMaNoHands/
 
 ## Support
 
-If this app saves you the cost of a Wispr/Speechify subscription and you'd like to toss a few bucks my way, I'd appreciate it — but it's entirely optional. The app is and will stay free and open-source.
+If this app saves you the cost of a Wispr/Speechify subscription and you'd like to toss a few bucks my way, I'd appreciate it, but it's entirely optional. The app is and will stay free and open-source.
 
 <p align="center">
   <a href="https://www.buymeacoffee.com/lmnh"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" alt="Buy Me a Coffee"></a>
