@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
-  <!-- Mic capsule (outlined, reduced emphasis) -->
-  <rect x="2.5" y="2.5" width="3" height="6" rx="1.5" fill="none" stroke="#000" stroke-width="0.8"/>
+  <!-- Mic capsule -->
+  <rect x="2.5" y="2.5" width="3" height="6" rx="1.5" fill="#000"/>
   <!-- Mic cradle -->
-  <path d="M1 7 Q1 10.5 4 10.5 Q7 10.5 7 7" stroke="#000" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+  <path d="M1 7 Q1 10.5 4 10.5 Q7 10.5 7 7" stroke="#000" stroke-width="1.1" fill="none" stroke-linecap="round"/>
   <!-- Mic stand post -->
-  <line x1="4" y1="10.5" x2="4" y2="13" stroke="#000" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="4" y1="10.5" x2="4" y2="13" stroke="#000" stroke-width="1.1" stroke-linecap="round"/>
   <!-- Mic base -->
-  <line x1="2" y1="13.5" x2="6" y2="13.5" stroke="#000" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="2" y1="13.5" x2="6" y2="13.5" stroke="#000" stroke-width="1.1" stroke-linecap="round"/>
 
-  <!-- Speaker body (emphasized) -->
-  <rect x="9.5" y="7" width="1.5" height="4" fill="#000"/>
+  <!-- Speaker body -->
+  <rect x="10" y="7" width="1.5" height="4" fill="#000"/>
   <!-- Speaker cone -->
-  <path d="M11 7 L13.5 4.5 L13.5 13.5 L11 11 Z" fill="#000"/>
+  <path d="M11.5 7 L14 4.5 L14 13.5 L11.5 11 Z" fill="#000"/>
 
-  <!-- Double sound wave (amplified) -->
-  <path d="M14.5 7.5 Q15.6 9 14.5 10.5" stroke="#000" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-  <path d="M16 5.5 Q17.4 9 16 12.5" stroke="#000" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Double sound wave (amplified — speaker is the active half) -->
+  <path d="M15 7.5 Q16.2 9 15 10.5" stroke="#000" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  <path d="M16.3 5.5 Q17.7 9 16.3 12.5" stroke="#000" stroke-width="1.1" fill="none" stroke-linecap="round"/>
 </svg>
