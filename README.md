@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="LookMaNoHands/Resources/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="128" height="128" alt="Look Ma No Hands">
-</p>
-
 <h1 align="center">Look Ma No Hands</h1>
 
 <p align="center">
