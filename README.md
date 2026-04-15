@@ -5,7 +5,7 @@
 <h1 align="center">Look Ma No Hands</h1>
 
 <p align="center">
-  System-wide dictation and text-to-speech for macOS, running entirely on your Mac.
+  System-wide dictation and text-to-speech for macOS, locally run open-source models, entirely on your Mac.
 </p>
 
 <p align="center">
@@ -21,10 +21,10 @@ A native macOS menu bar app that replaces cloud-based dictation and text-to-spee
 
 ## Features
 
-- **Speech-to-Text**: Press `Option + Space` to dictate anywhere. Your speech is transcribed locally using [WhisperKit](https://github.com/argmaxinc/WhisperKit) and injected at the cursor.
-- **Text-to-Speech**: Select text in any app and press `Option + S` to hear it read aloud using on-device TTS.
+- **Speech-to-Text**: Press `Option + Space` to dictate anywhere. Your speech is transcribed locally using [WhisperKit](https://github.com/argmaxinc/WhisperKit) and injected at the cursor, similar to wispr.
+- **Text-to-Speech**: Select text in any app and press `Option + S` to hear it read aloud using on-device TTS, similar to speechify.
 - **Fully Local**: All models run on Apple Silicon via CoreML. Nothing is sent to the cloud.
-- **System-Wide**: Works in any app with global hotkeys and accessibility-based text injection.
+- **System-Wide**: Works in any app with global hotkeys that are configurable and text injection.
 
 ## Requirements
 
