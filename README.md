@@ -51,7 +51,7 @@ A native macOS menu bar app that replaces cloud-based dictation and text-to-spee
    | `Option + Space` | Toggle dictation (speak to type) |
    | `Option + S` | Read selected text aloud |
 
-4. Read the menu bar icon. The icon is a simplified `mnh` monogram (mic on the left, speaker on the right) that swaps glyphs to show what the app is doing, so you can tell state at a glance without opening the popover:
+4. Read the menu bar icon. The icon is a simplified `mnh` monogram (mic on the left, speaker on the right). The mic stays the same across all states; the speaker side and any accent marks change to show what the app is doing, so you can tell state at a glance without opening the popover:
 
    | Icon | State | What it means |
    |---|---|---|
