@@ -11,7 +11,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2015%2B-blue" alt="macOS 15+">
   <img src="https://img.shields.io/badge/swift-6.0-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
+  <a href="https://github.com/j0elmiller/lmnh/actions/workflows/build.yml"><img src="https://github.com/j0elmiller/lmnh/actions/workflows/build.yml/badge.svg" alt="Build"></a>
   <a href="https://www.buymeacoffee.com/lmnh"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="20" alt="Buy Me a Coffee"></a>
 </p>
 
@@ -39,6 +40,15 @@ A native macOS menu bar app that replaces cloud-based dictation and text-to-spee
    cd lmnh
    xcodebuild -project LookMaNoHands.xcodeproj -scheme LookMaNoHands -configuration Debug
    ```
+
+   The `.xcodeproj` is committed, so this works from a fresh clone. If you edit `project.yml` or your project gets into a weird state, regenerate it:
+
+   ```bash
+   brew install xcodegen
+   xcodegen generate
+   ```
+
+   Building a release DMG additionally needs pre-staged models and a couple of Homebrew tools; see [CONTRIBUTING.md](CONTRIBUTING.md#preparing-models-for-release-builds).
 
 2. On first launch, the onboarding wizard will guide you through:
    - Granting **microphone** permission
@@ -93,6 +103,12 @@ LookMaNoHands/
     SettingsView.swift         # Preferences window
 ```
 
+## Contributing
+
+Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) for the dev setup, project layout, and PR expectations. Bug reports and feature requests go through the [issue templates](https://github.com/j0elmiller/lmnh/issues/new/choose); vulnerabilities go through [private reporting](https://github.com/j0elmiller/lmnh/security/advisories/new) per [SECURITY.md](SECURITY.md).
+
+All participation is governed by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Support
 
 If this app saves you the cost of a Wispr/Speechify subscription and you'd like to toss a few bucks my way, I'd appreciate it, but it's entirely optional. The app is and will stay free and open-source.
@@ -103,4 +119,4 @@ If this app saves you the cost of a Wispr/Speechify subscription and you'd like 
 
 ## License
 
-MIT
+[MIT](LICENSE)
