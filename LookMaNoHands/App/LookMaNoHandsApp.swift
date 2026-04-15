@@ -24,7 +24,7 @@ struct LookMaNoHandsApp: App {
             MenuBarView()
                 .environment(appState)
         } label: {
-            Image(systemName: appState.menuBarIcon)
+            Image(appState.menuBarIcon)
         }
         .menuBarExtraStyle(.window)
 

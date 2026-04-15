@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		03D9557D1331BC6002116CD2 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 165BC8717F7FF7AE7A617883 /* FluidAudio */; };
+		0BBA8CA20D09136D6896F0A5 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0187E248BC82A4C4BB7DF5E0 /* Theme.swift */; };
 		0BCC2A8BCF43C9F0AE9B7D08 /* TextInjector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D36A4FE989B8E47DC1D4322 /* TextInjector.swift */; };
 		1A0498BBFB97049BD4AC522A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 815A8CAE5D0291010855940E /* Assets.xcassets */; };
 		522F9EF4327B93EB99C12A4A /* BundledModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC7E0EB311B7C455C587D58 /* BundledModels.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0187E248BC82A4C4BB7DF5E0 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		04DAF06974C0B6894D8E9E0A /* SpeechEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechEngine.swift; sourceTree = "<group>"; };
 		0D829486273FDC69AB4AC7C0 /* TranscriptionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionEngine.swift; sourceTree = "<group>"; };
 		13F6F6A8C253688854D2C007 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -67,6 +69,7 @@
 				A7475F4AC562A9E21F93742D /* OnboardingView.swift */,
 				9C14C07D1AE2CC6BBE75C6F1 /* RecordingOverlay.swift */,
 				141F3F19E1140E3758235A97 /* SettingsView.swift */,
+				0187E248BC82A4C4BB7DF5E0 /* Theme.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -251,6 +254,7 @@
 				96357B210922841F9B3B9210 /* SpeechEngine.swift in Sources */,
 				0BCC2A8BCF43C9F0AE9B7D08 /* TextInjector.swift in Sources */,
 				A18A5C9F789D4FAE9FEE1F3D /* TextSelector.swift in Sources */,
+				0BBA8CA20D09136D6896F0A5 /* Theme.swift in Sources */,
 				86CAE5E056A7D524784FFA11 /* TranscriptionEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

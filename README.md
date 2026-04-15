@@ -51,6 +51,18 @@ A native macOS menu bar app that replaces cloud-based dictation and text-to-spee
    | `Option + Space` | Toggle dictation (speak to type) |
    | `Option + S` | Read selected text aloud |
 
+4. Read the menu bar icon. The icon is a simplified `mnh` monogram (mic on the left, speaker on the right) that swaps glyphs to show what the app is doing, so you can tell state at a glance without opening the popover:
+
+   | Icon | State | What it means |
+   |---|---|---|
+   | <img src="LookMaNoHands/Resources/Assets.xcassets/MenuIconIdle.imageset/MenuIconIdle.svg" alt="Idle" width="24" height="24"> | **Idle** | Ready to go. Models are loaded and both mic + accessibility permissions are granted. |
+   | <img src="LookMaNoHands/Resources/Assets.xcassets/MenuIconRecording.imageset/MenuIconRecording.svg" alt="Recording" width="24" height="24"> | **Recording** | Actively capturing mic audio. Start speaking, then press `Option + Space` again to stop (or release in push-to-talk mode). |
+   | <img src="LookMaNoHands/Resources/Assets.xcassets/MenuIconTranscribing.imageset/MenuIconTranscribing.svg" alt="Transcribing" width="24" height="24"> | **Transcribing** | Recording stopped; WhisperKit is converting audio into text and injecting it at the cursor. |
+   | <img src="LookMaNoHands/Resources/Assets.xcassets/MenuIconSpeaking.imageset/MenuIconSpeaking.svg" alt="Speaking" width="24" height="24"> | **Speaking** | Reading selected text aloud via TTS. Press `Option + S` again to stop. |
+   | <img src="LookMaNoHands/Resources/Assets.xcassets/MenuIconWarning.imageset/MenuIconWarning.svg" alt="Warning" width="24" height="24"> | **Warning** | A required permission is missing (microphone or accessibility). Open the popover and re-run onboarding or the relevant System Settings pane to resolve. |
+
+   The icons are rendered as template images, so macOS tints them to match your menu bar (light, dark, or Reduce Transparency).
+
 ## Architecture
 
 Pure Swift/SwiftUI menu bar app with three dependencies:

@@ -14,16 +14,15 @@ struct MenuBarView: View {
             errorSection
             footerSection
         }
-        .padding(12)
-        .frame(width: 280)
+        .padding(Theme.padding)
+        .frame(width: Theme.popoverWidth)
     }
 
     // MARK: - Status
 
     private var statusSection: some View {
         HStack {
-            Circle()
-                .fill(statusColor)
+            statusIndicator
                 .frame(width: 8, height: 8)
             Text(statusText)
                 .font(.headline)
@@ -31,13 +30,34 @@ struct MenuBarView: View {
         }
     }
 
+    // Ready state paints the indicator with the brand gradient so the popover
+    // carries a visual tie-in to the app icon. Active states keep distinct hues
+    // for at-a-glance feedback.
+    @ViewBuilder
+    private var statusIndicator: some View {
+        if isReady {
+            Circle().fill(LinearGradient.brand)
+        } else {
+            Circle().fill(statusColor)
+        }
+    }
+
+    private var isReady: Bool {
+        !appState.isRecording
+            && !appState.isTranscribing
+            && !appState.isSpeaking
+            && !appState.isLoadingModels
+            && appState.sttModelLoaded
+            && appState.ttsModelLoaded
+    }
+
     private var statusColor: Color {
-        if appState.isRecording { return .red }
-        if appState.isTranscribing { return .orange }
-        if appState.isSpeaking { return .blue }
-        if appState.isLoadingModels { return .yellow }
-        if appState.sttModelLoaded && appState.ttsModelLoaded { return .green }
-        return .gray
+        if appState.isRecording { return .stateRecording }
+        if appState.isTranscribing { return .stateTranscribing }
+        if appState.isSpeaking { return .stateSpeaking }
+        if appState.isLoadingModels { return .stateLoading }
+        if appState.sttModelLoaded && appState.ttsModelLoaded { return .stateReady }
+        return .stateIdle
     }
 
     private var statusText: String {
@@ -104,7 +124,7 @@ struct MenuBarView: View {
             }
             .font(.caption)
             .buttonStyle(.plain)
-            .foregroundStyle(.blue)
+            .foregroundStyle(Color.stateSpeaking)
         }
         .opacity(visible ? 1 : 0)
         .frame(height: visible ? nil : 0)
@@ -118,7 +138,7 @@ struct MenuBarView: View {
         let visible = !error.isEmpty
         return HStack {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.yellow)
+                .foregroundStyle(Color.stateLoading)
             Text(error)
                 .font(.caption)
                 .foregroundStyle(.secondary)

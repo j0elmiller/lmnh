@@ -68,7 +68,7 @@ struct SettingsView: View {
                     Text("Microphone")
                     Spacer()
                     Image(systemName: appState.micPermissionGranted ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundStyle(appState.micPermissionGranted ? .green : .red)
+                        .foregroundStyle(appState.micPermissionGranted ? Color.stateReady : Color.stateRecording)
                     if !appState.micPermissionGranted {
                         if appState.permissionManager.canPromptForMicrophone {
                             Button("Request Access") {
@@ -89,7 +89,7 @@ struct SettingsView: View {
                     Text("Accessibility")
                     Spacer()
                     Image(systemName: appState.accessibilityPermissionGranted ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundStyle(appState.accessibilityPermissionGranted ? .green : .red)
+                        .foregroundStyle(appState.accessibilityPermissionGranted ? Color.stateReady : Color.stateRecording)
                     if !appState.accessibilityPermissionGranted {
                         Button("Open Settings") {
                             appState.permissionManager.openAccessibilitySettings()
@@ -150,7 +150,7 @@ struct SettingsView: View {
                     Text("Status")
                     Spacer()
                     if appState.sttModelLoaded {
-                        Text("Loaded").foregroundStyle(.green)
+                        Text("Loaded").foregroundStyle(Color.stateReady)
                     } else if appState.isLoadingModels {
                         ProgressView().controlSize(.small)
                     } else {
@@ -198,7 +198,7 @@ struct SettingsView: View {
                     Text("Status")
                     Spacer()
                     if appState.ttsModelLoaded {
-                        Text("Loaded").foregroundStyle(.green)
+                        Text("Loaded").foregroundStyle(Color.stateReady)
                     } else if appState.isLoadingModels {
                         ProgressView().controlSize(.small)
                     } else {

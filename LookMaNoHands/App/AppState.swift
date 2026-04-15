@@ -203,14 +203,16 @@ final class AppState: @unchecked Sendable {
     }
 
     // MARK: - Menu Bar Icon
+    // Returns the name of a template SVG in Assets.xcassets. The MenuBarExtra
+    // renders this via Image(_:) so macOS tints it for the menu bar background.
     var menuBarIcon: String {
-        if isRecording { return "mic.fill" }
-        if isTranscribing { return "ellipsis.circle" }
-        if isSpeaking { return "speaker.wave.2.fill" }
+        if isRecording { return "MenuIconRecording" }
+        if isTranscribing { return "MenuIconTranscribing" }
+        if isSpeaking { return "MenuIconSpeaking" }
         if !micPermissionGranted || !accessibilityPermissionGranted {
-            return "exclamationmark.triangle"
+            return "MenuIconWarning"
         }
-        return "mic.circle"
+        return "MenuIconIdle"
     }
 
     @MainActor func checkPermissions() {

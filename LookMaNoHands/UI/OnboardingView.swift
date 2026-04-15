@@ -76,7 +76,7 @@ struct OnboardingView: View {
         VStack(spacing: 16) {
             Image(systemName: "mic.circle.fill")
                 .font(.system(size: 48))
-                .foregroundStyle(.blue)
+                .foregroundStyle(LinearGradient.brand)
 
             Text("Microphone Access")
                 .font(.headline)
@@ -86,7 +86,7 @@ struct OnboardingView: View {
 
             if appState.micPermissionGranted {
                 Label("Granted", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Color.stateReady)
             } else {
                 Button("Grant Permission") {
                     Task {
@@ -103,7 +103,7 @@ struct OnboardingView: View {
         VStack(spacing: 16) {
             Image(systemName: "hand.raised.circle.fill")
                 .font(.system(size: 48))
-                .foregroundStyle(.orange)
+                .foregroundStyle(LinearGradient.brand)
 
             Text("Accessibility Access")
                 .font(.headline)
@@ -114,7 +114,7 @@ struct OnboardingView: View {
 
             if appState.accessibilityPermissionGranted {
                 Label("Granted", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Color.stateReady)
             } else {
                 Text("Toggle on **LookMaNoHands** in System Settings.")
                     .font(.caption)
@@ -135,7 +135,7 @@ struct OnboardingView: View {
                 if accessibilityCheckFailed {
                     Text("Not detected. If you already toggled it on, try removing LookMaNoHands from the list and re-adding it (use the + button), then click \"I've enabled it\" again.")
                         .font(.caption)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.stateRecording)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -151,7 +151,7 @@ struct OnboardingView: View {
         return VStack(spacing: 16) {
             Image(systemName: "cpu.fill")
                 .font(.system(size: 48))
-                .foregroundStyle(.purple)
+                .foregroundStyle(LinearGradient.brand)
 
             Text(copy.title)
                 .font(.headline)
@@ -163,7 +163,7 @@ struct OnboardingView: View {
 
             if appState.sttModelLoaded && appState.ttsModelLoaded {
                 Label("Models Ready", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Color.stateReady)
             } else if appState.isLoadingModels {
                 VStack(spacing: 8) {
                     ProgressView()
@@ -175,7 +175,7 @@ struct OnboardingView: View {
                 if let error = appState.errorMessage {
                     Text(error)
                         .font(.caption)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.stateRecording)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -202,7 +202,7 @@ struct OnboardingView: View {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 48))
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.stateReady)
 
             Text("All Set!")
                 .font(.headline)

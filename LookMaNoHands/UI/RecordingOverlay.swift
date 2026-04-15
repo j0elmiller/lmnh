@@ -7,14 +7,14 @@ struct RecordingOverlay: View {
         HStack(spacing: 12) {
             Image(systemName: isTranscribing ? "ellipsis.circle.fill" : "mic.fill")
                 .font(.title2)
-                .foregroundStyle(isTranscribing ? .orange : .red)
+                .foregroundStyle(isTranscribing ? Color.stateTranscribing : Color.stateRecording)
 
             Text(isTranscribing ? "Transcribing..." : "Listening...")
                 .font(.body)
                 .foregroundStyle(.primary)
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .padding(.vertical, Theme.padding)
         .frame(width: 200, height: 44)
         .background(.ultraThinMaterial, in: Capsule())
         .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
