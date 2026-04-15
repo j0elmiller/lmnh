@@ -1,0 +1,91 @@
+name: Bug report
+description: Something isn't working right
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. The more detail you include, the faster this can be fixed.
+
+        **Not for security issues.** If you've found a vulnerability, please use [private vulnerability reporting](../../security/advisories/new) instead of this form.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: A clear description of the bug. What did you expect, and what actually happened?
+      placeholder: |
+        I pressed Option+Space to start dictation, but ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps so someone else can reproduce the issue.
+      placeholder: |
+        1. Launch the app
+        2. Open a text editor and click in a text field
+        3. Press Option+Space
+        4. ...
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      description: "System Settings > General > About (e.g. 15.3.1)"
+      placeholder: "15.3.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: chip
+    attributes:
+      label: Mac chip
+      options:
+        - Apple Silicon (M1)
+        - Apple Silicon (M2)
+        - Apple Silicon (M3)
+        - Apple Silicon (M4)
+        - Intel (not supported, but reporting anyway)
+        - Other / unsure
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: Look Ma No Hands version
+      description: "Menu bar icon > About, or the version shown on the DMG."
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-source
+    attributes:
+      label: How did you install the app?
+      options:
+        - Built from source (Debug)
+        - Built from source (Release)
+        - Downloaded DMG
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: |
+        Open **Console.app**, filter for `LookMaNoHands`, reproduce the issue, then paste the relevant lines here. Redact anything personal.
+      render: shell
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, workarounds, related issues, anything else that might help.

@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Debug build (macOS)
+    runs-on: macos-15
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        # macos-15 runners typically have the latest stable Xcode selected,
+        # but pin it explicitly so CI doesn't silently drift when GitHub
+        # bumps the default.
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen xcbeautify
+
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+            ~/Library/Caches/org.swift.swiftpm
+          key: spm-${{ runner.os }}-${{ hashFiles('LookMaNoHands.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Regenerate Xcode project
+        # Keeps CI honest: a stale .xcodeproj checked in against a modified
+        # project.yml will be caught here.
+        run: xcodegen generate
+
+      - name: Build (Debug)
+        # Models aren't bundled in CI — Resources/Models is marked optional
+        # in project.yml and the engines fall back to runtime Hugging Face
+        # downloads. This keeps the CI checkout small and fast.
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project LookMaNoHands.xcodeproj \
+            -scheme LookMaNoHands \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -skipPackagePluginValidation \
+            build \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify --renderer github-actions
