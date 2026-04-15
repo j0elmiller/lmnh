@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Source artwork for AppIcon.appiconset. Reuses the canonical
+    monogram geometry from MenuIconIdle.svg (the 18x18 menu-bar
+    template) on a brand-gradient squircle background.
+
+    Scale math: monogram spans ~1→16.2 (x) and ~2.5→13.5 (y) in
+    the 18-unit grid. At scale(40) that's 608x440 placed at
+    (168, 192) inside the 824x824 body, leaving even padding.
+
+    Regenerate the PNG renders with:
+      rsvg-convert -w <size> -h <size> design/app-icon.svg \
+        > LookMaNoHands/Resources/Assets.xcassets/AppIcon.appiconset/icon_<size>.png
+  -->
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6AD4F4"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Brand-gradient squircle background (Apple grid: 824 body in 1024 canvas, rx ~185) -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#brand)"/>
+
+  <!-- Monogram in white, lifted from MenuIconIdle.svg verbatim and scaled up -->
+  <g transform="translate(168 192) scale(40)" fill="#FFFFFF" stroke="#FFFFFF">
+    <!-- Mic capsule -->
+    <rect x="2.5" y="2.5" width="3" height="6" rx="1.5"/>
+    <!-- Mic cradle -->
+    <path d="M1 7 Q1 10.5 4 10.5 Q7 10.5 7 7" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+    <!-- Mic stand post -->
+    <line x1="4" y1="10.5" x2="4" y2="13" stroke-width="1.1" stroke-linecap="round"/>
+    <!-- Mic base -->
+    <line x1="2" y1="13.5" x2="6" y2="13.5" stroke-width="1.1" stroke-linecap="round"/>
+    <!-- Speaker body -->
+    <rect x="10" y="7" width="1.5" height="4"/>
+    <!-- Speaker cone -->
+    <path d="M11.5 7 L14 4.5 L14 13.5 L11.5 11 Z"/>
+    <!-- Sound wave -->
+    <path d="M15 7.5 Q16.2 9 15 10.5" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
