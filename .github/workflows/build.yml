@@ -49,9 +49,18 @@ jobs:
         # project.yml will be caught here.
         run: xcodegen generate
 
+      - name: Create empty Models directory
+        # project.yml references LookMaNoHands/Resources/Models as a folder
+        # resource. XcodeGen's `optional: true` lets project *generation*
+        # succeed when the folder is missing, but xcodebuild still fails at
+        # build time with `lstat: No such file or directory` if the folder
+        # doesn't exist on disk. CI never bundles models, so create an empty
+        # placeholder so the build can resolve the folder reference.
+        run: mkdir -p LookMaNoHands/Resources/Models
+
       - name: Build (Debug)
-        # Models aren't bundled in CI — Resources/Models is marked optional
-        # in project.yml and the engines fall back to runtime Hugging Face
+        # Models aren't bundled in CI — the placeholder folder above is
+        # empty, and the engines fall back to runtime Hugging Face
         # downloads. This keeps the CI checkout small and fast.
         run: |
           set -o pipefail
