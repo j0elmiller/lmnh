@@ -20,8 +20,18 @@ final class TranscriptionEngine: @unchecked Sendable {
         }
 
         let results = try await whisperKit.transcribe(audioArray: audioSamples)
-        let text = results.map(\.text).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-        return text
+        let raw = results.map(\.text).joined(separator: " ")
+        return Self.sanitize(raw)
+    }
+
+    // Strips Whisper's non-speech annotations ([BLANK_AUDIO], [MUSIC],
+    // [INAUDIBLE], [BIRDS CHIRPING], etc.) and any stray special tokens
+    // (<|nospeech|>, <|startoftranscript|>, ...) that can leak through.
+    static func sanitize(_ raw: String) -> String {
+        var cleaned = raw.replacing(/\[[^\]]*\]/, with: "")
+        cleaned = cleaned.replacing(/<\|[^|>]*\|>/, with: "")
+        cleaned = cleaned.replacing(/\s+/, with: " ")
+        return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     func unloadModel() {

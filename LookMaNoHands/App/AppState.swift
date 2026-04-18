@@ -263,10 +263,7 @@ final class AppState: @unchecked Sendable {
                 return
             }
 
-            var text = try await transcriptionEngine.transcribe(audioSamples: audioSamples)
-            if text.trimmingCharacters(in: .whitespacesAndNewlines) == "[BLANK_AUDIO]" {
-                text = ""
-            }
+            let text = try await transcriptionEngine.transcribe(audioSamples: audioSamples)
             lastTranscription = text
 
             if !text.isEmpty {
