@@ -40,4 +40,22 @@ final class PermissionManager {
             NSWorkspace.shared.open(url)
         }
     }
+
+    /// Removes all TCC entries for this app's bundle ID. Useful when
+    /// ad-hoc-signed rebuilds have left stale entries that don't match
+    /// the running binary's code signature. User must re-grant after.
+    @discardableResult
+    func resetAccessibilityTCC() -> Bool {
+        guard let bundleID = Bundle.main.bundleIdentifier else { return false }
+        let process = Process()
+        process.launchPath = "/usr/bin/tccutil"
+        process.arguments = ["reset", "Accessibility", bundleID]
+        do {
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus == 0
+        } catch {
+            return false
+        }
+    }
 }
