@@ -4,6 +4,7 @@ struct OnboardingView: View {
     @Environment(AppState.self) private var appState
     @State private var currentStep = 0
     @State private var accessibilityCheckFailed = false
+    @State private var showDiagnostics = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -139,6 +140,44 @@ struct OnboardingView: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+
+                Divider().padding(.vertical, 4)
+
+                Button("Reset Accessibility Permission") {
+                    let ok = appState.permissionManager.resetAccessibilityTCC()
+                    if ok {
+                        appState.checkPermissions()
+                        accessibilityCheckFailed = false
+                    }
+                }
+                .font(.caption)
+                .help("Removes all prior permission entries for this app so you can start fresh.")
+
+                Text("Last resort — removes all prior permission entries for LookMaNoHands so you can toggle it on with a clean slate.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                DisclosureGroup("Diagnostics", isExpanded: $showDiagnostics) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Bundle ID: \(Bundle.main.bundleIdentifier ?? "unknown")")
+                        Text("Path: \(Bundle.main.bundlePath)")
+                            .lineLimit(3)
+                            .textSelection(.enabled)
+                    }
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .font(.caption2)
+                .padding(.top, 4)
+            }
+        }
+        .onChange(of: appState.accessibilityPermissionGranted) { _, granted in
+            if granted && currentStep == 1 {
+                accessibilityCheckFailed = false
+                currentStep = 2
             }
         }
     }

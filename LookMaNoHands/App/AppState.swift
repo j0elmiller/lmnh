@@ -148,6 +148,33 @@ final class AppState: @unchecked Sendable {
             }
         }
 
+        // Fires when user toggles Accessibility in System Settings. Private
+        // but stable API — same one used by Rectangle, AltTab, Hammerspoon.
+        // Without this, AXIsProcessTrusted() can lag the real state because
+        // the per-process trust cache only refreshes on explicit re-check.
+        DistributedNotificationCenter.default().addObserver(
+            forName: Notification.Name("com.apple.accessibility.api"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.checkPermissions() }
+        }
+
+        // Re-check whenever THIS app is activated — covers tabbing back from
+        // System Settings and acts as a safety net if the DistributedNotification
+        // is dropped on some macOS builds.
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard
+                let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                app.bundleIdentifier == bundleID
+            else { return }
+            Task { @MainActor in self?.checkPermissions() }
+        }
+
         // Register hotkeys via file-scope nonisolated function so closures
         // don't inherit @MainActor isolation (avoids Carbon thread crash).
         _hotkeyAppState = self
@@ -263,10 +290,7 @@ final class AppState: @unchecked Sendable {
                 return
             }
 
-            var text = try await transcriptionEngine.transcribe(audioSamples: audioSamples)
-            if text.trimmingCharacters(in: .whitespacesAndNewlines) == "[BLANK_AUDIO]" {
-                text = ""
-            }
+            let text = try await transcriptionEngine.transcribe(audioSamples: audioSamples)
             lastTranscription = text
 
             if !text.isEmpty {

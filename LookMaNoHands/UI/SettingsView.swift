@@ -94,6 +94,11 @@ struct SettingsView: View {
                         Button("Open Settings") {
                             appState.permissionManager.openAccessibilitySettings()
                         }
+                        Button("Reset") {
+                            _ = appState.permissionManager.resetAccessibilityTCC()
+                            appState.checkPermissions()
+                        }
+                        .help("Removes all prior permission entries for this app (useful after repeated dev rebuilds).")
                     }
                 }
             }
